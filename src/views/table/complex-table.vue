@@ -79,12 +79,12 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="Actions" align="center" width="230" class-name="small-padding fixed-width">
+      <el-table-column label="操作" align="center" width="230" class-name="small-padding fixed-width">
         <template slot-scope="{row,$index}">
-          <el-button v-if="row.status!='using'" size="mini" type="success" @click="handleModifyStatus(row,'published')">
+          <el-button v-if="row.status!='using'" size="mini" type="success" @click="handleModifyStatus(row,'using')">
             启用
           </el-button>
-          <el-button v-if="row.status!='disabled'" size="mini" @click="handleModifyStatus(row,'draft')">
+          <el-button v-if="row.status!='disabled'" size="mini" @click="handleModifyStatus(row,'disabled')">
             禁用
           </el-button>
           <el-button v-if="row.status!='deleted'" size="mini" type="danger" @click="handleDelete(row,$index)">
@@ -149,7 +149,6 @@ import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 import permission from '@/directive/permission/index.js' // 权限判断指令
-import checkPermission from '@/utils/permission' // 权限判断函数
 
 const calendarTypeOptions = [
   { key: 'CN', display_name: 'China' },
@@ -187,7 +186,7 @@ export default {
       list: null,
       total: 0,
       listLoading: true,
-      not_used:true,
+      not_used:true, 
       listQuery: {
         page: 1,
         limit: 20,
@@ -248,7 +247,7 @@ export default {
     },
     handleModifyStatus(row, status) {
       this.$message({
-        message: '操作Success',
+        message: '操作成功',
         type: 'success'
       })
       row.status = status

@@ -12,45 +12,37 @@
       </template>
     </el-table-column>
 
-    <el-table-column width="180px" align="center" label="Date">
+    <el-table-column width="180px" align="center" label="创建时间">
       <template slot-scope="scope">
         <span>{{ scope.row.timestamp | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
       </template>
     </el-table-column>
 
-    <el-table-column min-width="300px" label="Title">
+    <el-table-column min-width="300px" label="用户信息">
       <template slot-scope="{row}">
         <span>{{ row.title }}</span>
         <el-tag>{{ row.type }}</el-tag>
       </template>
     </el-table-column>
 
-    <el-table-column width="110px" align="center" label="Author">
+    <el-table-column width="110px" align="center" label="用户名">
       <template slot-scope="scope">
         <span>{{ scope.row.author }}</span>
       </template>
     </el-table-column>
 
-    <el-table-column width="120px" label="Importance">
-      <template slot-scope="scope">
-        <svg-icon v-for="n in +scope.row.importance" :key="n" icon-class="star" />
-      </template>
-    </el-table-column>
+   
 
-    <el-table-column align="center" label="Readings" width="95">
-      <template slot-scope="scope">
-        <span>{{ scope.row.pageviews }}</span>
-      </template>
-    </el-table-column>
+   
 
-    <el-table-column class-name="status-col" label="Status" width="110">
+    <el-table-column class-name="status-col" label="账号状态" width="110">
       <template slot-scope="{row}">
         <el-tag :type="row.status | statusFilter">
           {{ row.status }}
         </el-tag>
       </template>
     </el-table-column>
-    <el-table-column label="Actions" align="center" width="230" class-name="small-padding fixed-width">
+    <el-table-column label="操作" align="center" width="230" class-name="small-padding fixed-width">
         <template slot-scope="{row,$index}">
           <el-button v-if="row.status!='using'" size="mini" type="success" @click="handleModifyStatus(row,'published')">
             启用
@@ -68,8 +60,9 @@
 
 <script>
 import { fetchUser } from '@/api/article'
-
+import permission from '@/directive/permission/index.js' // 权限判断指令
 export default {
+  directives: { permission },
   filters: {
     statusFilter(status) {
       const statusMap = {

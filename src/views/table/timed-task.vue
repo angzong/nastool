@@ -84,7 +84,7 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="Actions" align="center" width="230" class-name="small-padding fixed-width">
+        <el-table-column label="操作" align="center" width="230" class-name="small-padding fixed-width">
           <template slot-scope="{row,$index}">
             <el-button type="primary" size="mini" @click="handleUpdate(row)">
               修改
@@ -111,6 +111,11 @@
               <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
             </el-select>
           </el-form-item>
+          <el-form-item label="插件" prop="content">
+            <el-select v-model="temp.plugin" class="filter-item" placeholder="Please select">
+              <el-option v-for="item in pluginTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
+            </el-select>
+          </el-form-item>
           <el-form-item label="执行时间" prop="timestamp">
             <el-time-picker v-model="temp.timestamp" type="datetime" placeholder="Please pick a date" />
           </el-form-item>
@@ -127,19 +132,17 @@
           </el-form-item>
           <el-form-item label="重复周期">
             <el-checkbox-group v-model="checkboxVal">
-                <el-checkbox label="apple">
-                    apple
-                </el-checkbox>
-                <el-checkbox label="banana">
-                    banana
-                </el-checkbox>
-                <el-checkbox label="orange">
-                    orange
-                </el-checkbox>
+                <el-checkbox label="Mon"> 周一 </el-checkbox>
+                <el-checkbox label="Tue">周二</el-checkbox>
+                <el-checkbox label="Wed">周三</el-checkbox>
+                <el-checkbox label="Thur"> 周四 </el-checkbox>
+                <el-checkbox label="Fri">周五</el-checkbox>
+                <el-checkbox label="Sat">周六</el-checkbox>
+                <el-checkbox label="Sun">周日</el-checkbox>
+                <el-checkbox label="EveryDay">每天</el-checkbox>
             </el-checkbox-group>
           </el-form-item>
 
-      
 
 
           <el-form-item label="Remark">
@@ -148,10 +151,10 @@
         </el-form>
         <div slot="footer" class="dialog-footer">
           <el-button @click="dialogFormVisible = false">
-            Cancel
+            取消
           </el-button>
           <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">
-            Confirm
+            确认
           </el-button>
         </div>
       </el-dialog>
@@ -173,13 +176,19 @@
   import waves from '@/directive/waves' // waves directive
   import { parseTime } from '@/utils'
   import Pagination from '@/components/Pagination' // secondary package based on el-pagination
-  const defaultFormThead = ['apple', 'banana']
+  const defaultFormThead = ['Mon', 'Sun']
   const calendarTypeOptions = [
     { key: 'CN', display_name: 'China' },
     { key: 'US', display_name: 'USA' },
     { key: 'JP', display_name: 'Japan' },
     { key: 'EU', display_name: 'Eurozone' }
   ]
+  const pluginTypeOptions = [
+    { key: 'CN', display_name: '影视类' },
+    { key: 'US', display_name: '音乐类' },
+    { key: 'JP', display_name: '图片' },
+  ]
+
   
   // arr to obj, such as { CN : "China", US : "USA" }
   const calendarTypeKeyValue = calendarTypeOptions.reduce((acc, cur) => {
@@ -221,6 +230,7 @@
         },
         importanceOptions: [1, 2, 3],
         calendarTypeOptions,
+        pluginTypeOptions,
         sortOptions: [{ label: '升序', key: '+id' }, { label: '降序', key: '-id' }],
         statusOptions: ['using', 'disabled'],
         showReviewer: false,
@@ -228,10 +238,12 @@
           id: undefined,
           importance: 1,
           remark: '',
+          plugin: '',
           timestamp: new Date(),
           title: '',
           type: '',
-          status: 'using'
+          status: 'using',
+          checkboxVal: ['Mon', 'Sun']
         },
         dialogFormVisible: false,
         dialogStatus: '',
@@ -249,7 +261,7 @@
         downloadLoading: false,
         key: 1, // table key
         formTheadOptions: ['apple', 'banana', 'orange'],
-        checkboxVal: defaultFormThead, // checkboxVal
+        checkboxVal: defaultFormThead
       }
     },
     created() {
@@ -323,6 +335,7 @@
           if (valid) {
             this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
             this.temp.author = 'vue-element-admin'
+            this.temp.checkboxVal=this.checkboxVal
             createArticle(this.temp).then(() => {
               this.list.unshift(this.temp)
               this.dialogFormVisible = false
