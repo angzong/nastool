@@ -8,23 +8,60 @@ const image_uri = 'https://wpimg.wallstcn.com/e4558086-631c-425c-9430-56ffb46e70
 
 for (let i = 0; i < count; i++) {
   List.push(Mock.mock({
+    
+    // timestamp: +Mock.Random.date('T'),
+    // author: '@first',
+    // reviewer: '@first',
+    // title: '@title(5, 10)',
+    // content_short: 'mock data',
+    // content: baseContent,
+    // forecast: '@float(0, 100, 2, 2)',
+    // importance: '@integer(1, 3)',
+    // 'repeat|1': ['每月', '每周','每天'],
+    // display_time: '@datetime',
+    // comment_disabled: true,
+    // pageviews: '@integer(300, 5000)',
+    // image_uri,
+    // platforms: ['a-platform'],
+
     id: '@increment',
-    timestamp: +Mock.Random.date('T'),
-    author: '@first',
-    reviewer: '@first',
-    title: '@title(5, 10)',
-    content_short: 'mock data',
-    content: baseContent,
-    forecast: '@float(0, 100, 2, 2)',
-    importance: '@integer(1, 3)',
-    'type|1': ['CN', 'US', 'JP', 'EU'],
-    'status|1': ['disabled', 'using'],
-    'repeat|1': ['每月', '每周','每天'],
-    display_time: '@datetime',
-    comment_disabled: true,
-    pageviews: '@integer(300, 5000)',
-    image_uri,
-    platforms: ['a-platform']
+    jobGroup: '@ctitle(3,6)',
+    jobName: '@ctitle(4,8)',
+		cronExpression: '* * * * * ? *',  //cron表达式
+    'concurrent|1': ['0','1'],  //是否允许并发执行
+    'invokeMethod|1': ['HTTP_GET', 'HTTP_POST', 'HTTP_PUT', 'HTTP_DELETE'],
+    invokeParam: '@ctitle(5,10)',  //请求参数
+    invokeTarget: '@ctitle(5,10)',  //调用目标字符串
+    misfirePolicy: '@ctitle(5,10)',  //cron计划策略
+    createTime: '@date',
+    'status|1': ['PENDING','PROCESSED','PROCESSING'],
+    createUser: '@cname',
+    updateUser: '@cname',
+		createTime: {
+      "date": '@date',
+      "day": 0,
+      "hours": 0,
+      "minutes": 0,
+      "month": 0,
+      "nanos": 0,
+      "seconds": 0,
+      "time": 0,
+      "timezoneOffset": 0,
+      "year": 0
+		},
+    updateTime: {
+      "date": 0,
+      "day": 0,
+      "hours": 0,
+      "minutes": 0,
+      "month": 0,
+      "nanos": 0,
+      "seconds": 0,
+      "time": 0,
+      "timezoneOffset": 0,
+      "year": 0
+    },
+
   }))
 }
 
@@ -52,15 +89,12 @@ for (let i = 0; i < 10; i++) {
 
 module.exports = [
   {
-    url: '/vue-element-admin/article/list',
+    url: '/job/list',
     type: 'get',
     response: config => {
-      const { importance, type, title, page = 1, limit = 20, sort } = config.query
+      const {page = 1, limit = 20, sort } = config.query
 
       let mockList = List.filter(item => {
-        if (importance && item.importance !== +importance) return false
-        if (type && item.type !== type) return false
-        if (title && item.title.indexOf(title) < 0) return false
         return true
       })
 
@@ -73,8 +107,11 @@ module.exports = [
       return {
         code: 20000,
         data: {
+          current:'@integer(1,5)',
+          pages: Math.ceil(mockList.length/20),
+          size:20,
           total: mockList.length,
-          items: pageList
+          records: pageList,
         }
       }
     }
@@ -144,7 +181,7 @@ module.exports = [
   },
 
   {
-    url: '/vue-element-admin/article/create',
+    url: '/job/add',  //添加任务
     type: 'post',
     response: _ => {
       return {
@@ -155,8 +192,18 @@ module.exports = [
   },
 
   {
-    url: '/vue-element-admin/article/update',
-    type: 'post',
+    url: '/job/update/*',  
+    type: 'put',
+    response: _ => {
+      return {
+        code: 20000,
+        data: 'success'
+      }
+    }
+  },
+  {
+    url: '/job/delete/*',  //根据任务ID删除任务
+    type: 'delete',
     response: _ => {
       return {
         code: 20000,
@@ -164,5 +211,6 @@ module.exports = [
       }
     }
   }
+
 ]
 
