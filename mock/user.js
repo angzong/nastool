@@ -35,7 +35,7 @@ const users = {
 module.exports = [
   // user login
   {
-    url: '/vue-element-admin/user/login',
+    url: '/authenticate/login',
     type: 'post',
     response: config => {
       const { username } = config.body
@@ -56,21 +56,51 @@ module.exports = [
     }
   },
 
+  // user register
+  {
+    url: '/authenticate/register',
+    type: 'post',
+    response: config => {
+      const { username,password, email } = config.body
+      console.log(config.body)
+      if(tokens.hasOwnProperty(username)){
+        return {
+          code: 60204,
+          message: '用户名已存在.'
+        }
+      }
+      tokens[username]=username
+      const token='editor-token'
+      return {
+        code: 20000,
+        data: token
+      }
+    }
+  },
+
   // get user info
   {
-    url: '/vue-element-admin/user/info\.*',
+    url: '/user\.*',
     type: 'get',
     response: config => {
       const { token } = config.query
-      const info = users[token]
-
-      // mock error
-      if (!info) {
-        return {
-          code: 50008,
-          message: 'Login failed, unable to get user details.'
-        }
+      const info = {
+        "email": "",
+        "id": 0,
+        "password": "",
+        "plugins": [],
+        "userLevel": "ADMIN",
+        "username": ""
       }
+      // console.log(config)
+      // console.log(users)
+      // // mock error
+      // if (!info) {
+      //   return {
+      //     code: 50008,
+      //     message: 'Login failed, unable to get user details.'
+      //   }
+      // }
 
       return {
         code: 20000,

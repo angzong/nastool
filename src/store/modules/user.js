@@ -1,4 +1,4 @@
-import { login, logout, getInfo } from '@/api/user'
+import { login,register, logout, getInfo } from '@/api/user'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import router, { resetRouter } from '@/router'
 
@@ -7,7 +7,8 @@ const state = {
   name: '',
   avatar: '',
   introduction: '',
-  roles: []
+  roles: [],
+  email:'', id:'', password:'', plugins:[], userLevel:''
 }
 
 const mutations = {
@@ -43,7 +44,22 @@ const actions = {
       })
     })
   },
-
+  // user register
+  register({ commit }, userInfo) {
+    const { username, password, email } = userInfo
+    console.log("register_store")
+    return new Promise((resolve, reject) => {
+      // loginAndRegisterVo = 
+      register({ username: username.trim(), password: password , email: email}).then(response => {
+        const { data } = response
+        commit('SET_TOKEN', data.token)
+        setToken(data.token)
+        resolve()
+      }).catch(error => {
+        reject(error)
+      })
+    })
+  },
   // get user info
   getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
@@ -53,16 +69,17 @@ const actions = {
         if (!data) {
           reject('Verification failed, please Login again.')
         }
-
-        const { roles, name, avatar, introduction } = data
+        const { email, id, password, plugins, userLevel,username } = data
+        // const { roles, name, avatar, introduction } = data
 
         // roles must be a non-empty array
-        if (!roles || roles.length <= 0) {
+        if (!userLevel) {
           reject('getInfo: roles must be a non-null array!')
         }
-
-        commit('SET_ROLES', roles)
-        commit('SET_NAME', name)
+        const avatar=''
+        const introduction=''
+        commit('SET_ROLES', userLevel)
+        commit('SET_NAME', username)
         commit('SET_AVATAR', avatar)
         commit('SET_INTRODUCTION', introduction)
         resolve(data)

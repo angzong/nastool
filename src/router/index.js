@@ -53,7 +53,10 @@ export const constantRoutes = [
   {
     path: '/login',
     component: () => import('@/views/login/index'),
-    hidden: true
+  },
+  {
+    path: '/register',
+    component: () => import('@/views/login/register'),
   },
   {
     path: '/auth-redirect',
@@ -206,7 +209,7 @@ export const asyncRoutes = [
   },
 
   {
-    path: '/error',
+    path: '/plugin',
     component: Layout,
     redirect: 'noRedirect',
     name: 'ErrorPages',
@@ -216,7 +219,7 @@ export const asyncRoutes = [
     },
     children: [
       {
-        path: '401',
+        path: 'market',
         component: () => import('@/views/icons/index'),
         name: 'Plugin-market',
         meta: { title: '插件市场', noCache: true }
