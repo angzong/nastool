@@ -28,7 +28,7 @@
     <el-table
       :key="tableKey"
       v-loading="listLoading"
-      :data="records"
+      :data="list"
       border
       fit
       highlight-current-row
@@ -40,33 +40,44 @@
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="任务组名" width="200px" align="center">
+      <el-table-column label="执行时间" width="110px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.jobGroup }}</span>
+          <span>{{ row.timestamp | parseTime('{h}:{i}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="任务名" min-width="150px" align="center">
+      <el-table-column label="重复" width="80px" align="center">
         <template slot-scope="{row}">
-          <span class="link-type" @click="handleUpdate(row)">{{ row.jobName }}</span>
+          <span>{{ row.repeat }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="标题" min-width="150px" align="center">
+        <template slot-scope="{row}">
+          <span class="link-type" @click="handleUpdate(row)">{{ row.title }}</span>
           <el-tag>{{ row.invokeMethod | typeFilter }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="创建时间" width="200px" align="center">
+      <el-table-column label="插件" width="110px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.createTime.date }}</span>
+          <span>{{ row.author }}</span>
         </template>
       </el-table-column>
-      <el-table-column v-if="showReviewer" label="创建者" min-width="100px" align="center">
+      <el-table-column v-if="showReviewer" label="创建者" width="110px" align="center">
         <template slot-scope="{row}">
-          <span style="color:red;">{{ row.createUser }}</span>
+          <span style="color:red;">{{ row.reviewer }}</span>
         </template>
       </el-table-column>
-      <el-table-column v-if="showReviewer" label="更新者" min-width="100px" align="center">
+      <el-table-column label="优先级" width="80px">
         <template slot-scope="{row}">
-          <span style="color:red;">{{ row.updateUser }}</span>
+          <svg-icon v-for="n in + row.importance" :key="n" icon-class="star" class="meta-item__icon" />
         </template>
       </el-table-column>
-      <el-table-column label="状态" class-name="status-col" width="130">
+      <el-table-column label="已执行次数" align="center" width="95">
+        <template slot-scope="{row}">
+          <span v-if="row.pageviews" class="link-type" @click="handleFetchPv(row.pageviews)">{{ row.pageviews }}</span>
+          <span v-else>0</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="状态" class-name="status-col" width="100">
         <template slot-scope="{row}">
           <el-tag :type="row.status | statusFilter">
             {{ row.status }}
@@ -78,14 +89,11 @@
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             修改
           </el-button>
-          <el-button v-if="row.status =='PENDING'" size="mini" type="warning" @click="handleModifyStatus(row,'PROCESSING')">
-            挂起
+          <el-button v-if="row.status!='using'" size="mini" type="success" @click="handleModifyStatus(row,'using')">
+            启用
           </el-button>
-          <el-button v-if="row.status =='PROCESSING'" size="mini" type="success" @click="handleModifyStatus(row,'PENDING')">
-            进行中
-          </el-button>
-          <el-button v-if="row.status =='PROCESSED'" size="mini" type="info">
-            已完成
+          <el-button v-if="row.status!='disabled'" size="mini" @click="handleModifyStatus(row,'disabled')">
+            禁用
           </el-button>
           <el-button v-if="row.status!='deleted'" size="mini" type="danger" @click="handleDelete(row,$index)">
             删除
@@ -94,25 +102,58 @@
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :pages.sync="listQuery.pageNum" :size.sync="listQuery.pageSize" @pagination="getList" />
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="140px" style="width: 400px; margin-left:50px;">
+      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="90px" style="width: 400px; margin-left:50px;">
+        <!-- <el-form-item label="是否允许并发执行" prop="type">
+            <el-select v-model="temp.type" class="filter-item" placeholder="Please select">
+              <el-option v-for="item in invokeMethodTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
+            </el-select>
+          </el-form-item> -->
+        <!-- <el-form-item label="插件" prop="content">
+            <el-select v-model="temp.plugin" class="filter-item" placeholder="Please select">
+              <el-option v-for="item in pluginTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="标题" prop="title">
+            <el-input v-model="temp.title" />
+          </el-form-item>
+          <el-form-item label="状态">
+            <el-select v-model="temp.status" class="filter-item" placeholder="Please select">
+              <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="优先级">
+            <el-rate v-model="temp.importance" :colors="['#99A9BF', '#F7BA2A', '#FF9900']" :max="3" style="margin-top:8px;" />
+          </el-form-item>
+          <el-form-item label="重复周期">
+            <el-checkbox-group v-model="checkboxVal">
+                <el-checkbox label="Mon"> 周一 </el-checkbox>
+                <el-checkbox label="Tue">周二</el-checkbox>
+                <el-checkbox label="Wed">周三</el-checkbox>
+                <el-checkbox label="Thur"> 周四 </el-checkbox>
+                <el-checkbox label="Fri">周五</el-checkbox>
+                <el-checkbox label="Sat">周六</el-checkbox>
+                <el-checkbox label="Sun">周日</el-checkbox>
+                <el-checkbox label="EveryDay">每天</el-checkbox>
+            </el-checkbox-group>
+          </el-form-item>
+          <el-form-item label="Remark">
+            <el-input v-model="temp.remark" :autosize="{ minRows: 2, maxRows: 4}" type="textarea" placeholder="Please input" />
+          </el-form-item> -->
         <el-form-item label="任务组名">
           <el-input v-model="temp.jobGroup" />
         </el-form-item>
         <el-form-item label="任务名">
           <el-input v-model="temp.jobName" />
         </el-form-item>
-        <el-form-item label="是否允许并发执行">
+        <el-form-item label="是否允许并发执行" prop="concurrent">
           <el-radio v-model="temp.concurrent" label="1">是</el-radio>
           <el-radio v-model="temp.concurrent" label="0">否</el-radio>
         </el-form-item>
         <el-form-item label="下一次执行时间">
-          <el-popover v-model="cronPopover" style="width: 200px;height: 100px">
-            <el-input slot="reference" v-model="temp.cronExpression" placeholder="请输入定时策略" @click="cronPopover=true" />
-            <vueCron i18n="cn" @change="changeCron" @close="cronPopover=false" />
-          </el-popover>
+          <el-time-picker v-model="temp.timestamp" type="datetime" placeholder="Please pick a date" />
         </el-form-item>
         <el-form-item label="请求方式" prop="invokeMethod">
           <el-select v-model="temp.invokeMethod" class="filter-item" placeholder="请选择">
@@ -125,7 +166,7 @@
         <el-form-item label="调用目标字符串">
           <el-input v-model="temp.invokeTarget" />
         </el-form-item>
-        <el-form-item label="cron计划策略">
+        <el-form-item label="corn计划策略">
           <el-input v-model="temp.misfirePolicy" />
         </el-form-item>
       </el-form>
@@ -152,7 +193,7 @@
 </template>
 
 <script>
-import { fetchList, fetchPv, createArticle, updateArticle, deleteArticle } from '@/api/article'
+import { fetchList, fetchPv, createArticle, updateArticle } from '@/api/article'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -194,57 +235,61 @@ export default {
   },
   data() {
     return {
-      tableKey: 6,
+      tableKey: 0,
+      list: null,
+      total: 0,
       listLoading: true,
       not_used: true,
-
+      listQuery: {
+        page: 1,
+        limit: 20,
+        importance: undefined,
+        title: undefined,
+        type: undefined,
+        sort: '+id'
+      },
       importanceOptions: [1, 2, 3],
       invokeMethodTypeOptions,
       // pluginTypeOptions,
       sortOptions: [{ label: '升序', key: '+id' }, { label: '降序', key: '-id' }],
       statusOptions: ['using', 'disabled'],
       showReviewer: false,
+      temp: {
+        id: undefined,
+        importance: 1,
+        remark: '',
+        plugin: '',
+        title: '',
+        type: '',
+        status: 'using',
+        checkboxVal: ['Mon', 'Sun'],
 
+        concurrent: '', // 是否允许并发执行
+        timestamp: new Date(), // 下一次执行时间
+        invokeMethod: '', // 请求方式
+        invokeParam: '', // 请求参数
+        invokeTarget: '', // 调用目标字符串
+        jobGroup: '', // 任务组名
+        jobName: '', // 任务名
+        misfirePolicy: '' // cron计划策略
+      },
       dialogFormVisible: false,
       dialogStatus: '',
       textMap: {
-        update: '修改',
-        create: '新建'
+        update: 'Edit',
+        create: 'Create'
       },
       dialogPvVisible: false,
       pvData: [],
       rules: {
         type: [{ required: true, message: 'type is required', trigger: 'change' }],
-        createTime: [{ type: 'date', required: true, message: 'createTime is required', trigger: 'change' }],
+        timestamp: [{ type: 'date', required: true, message: 'timestamp is required', trigger: 'change' }],
         title: [{ required: true, message: 'title is required', trigger: 'blur' }]
       },
       downloadLoading: false,
       key: 1, // table key
       formTheadOptions: ['apple', 'banana', 'orange'],
-      checkboxVal: defaultFormThead,
-
-      current: 0, // 当前页数
-      pages: 5, // 总页数
-      size: 20, // 每页大小
-      total: 0, // 记录条数
-      records: [], // 记录数组
-      temp:
-        {
-          concurrent: '', // 是否允许并发执行
-          cronExpression: '', // cron执行表达式
-          invokeMethod: '', // 请求方式
-          invokeParam: '', // 请求参数
-          invokeTarget: '', // 调用目标字符串
-          jobGroup: '', // 任务组名
-          jobName: '', // 任务名
-          misfirePolicy: '' // cron计划策略
-        },
-      listQuery: {
-        pageNum: 1,
-        pageSize: 20,
-        sort: '+id'
-      },
-      cronPopover: false
+      checkboxVal: defaultFormThead
     }
   },
   created() {
@@ -260,12 +305,8 @@ export default {
     getList() {
       this.listLoading = true
       fetchList(this.listQuery).then(response => {
-        this.current = response.data.current
-        this.pages = response.data.pages
-        this.size = response.data.size
+        this.list = response.data.items
         this.total = response.data.total
-        this.records = response.data.records
-        console.log(this.records)
 
         // Just to simulate the time of the request
         setTimeout(() => {
@@ -274,20 +315,15 @@ export default {
       })
     },
     handleFilter() {
-      this.listQuery.pageNum = 1
+      this.listQuery.page = 1
       this.getList()
     },
     handleModifyStatus(row, status) {
-      const tempData = Object.assign({}, row) // copy obj
-      tempData.status = status
-      updateArticle(tempData, tempData.id).then(() => {
-        this.getList()
-        this.$message({
-          message: '操作成功',
-          type: 'success'
-        })
-        row.status = status
+      this.$message({
+        message: '操作成功',
+        type: 'success'
       })
+      row.status = status
     },
     sortChange(data) {
       const { prop, order } = data
@@ -305,18 +341,14 @@ export default {
     },
     resetTemp() {
       this.temp = {
-        concurrent: '', // 是否允许并发执行
-        cronExpression: '', // cron执行表达式
-        invokeMethod: '', // 请求方式
-        invokeParam: '', // 请求参数
-        invokeTarget: '', // 调用目标字符串
-        jobGroup: '', // 任务组名
-        jobName: '', // 任务名
-        misfirePolicy: '' // cron计划策略
+        id: undefined,
+        importance: 1,
+        remark: '',
+        timestamp: new Date(),
+        title: '',
+        status: 'using',
+        type: ''
       }
-    },
-    changeCron(val) {
-      this.temp.cronExpression = val
     },
     handleCreate() {
       this.resetTemp()
@@ -329,18 +361,12 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          // this.temp.id = this.records[this.total-1].id+1
-          // const lastRecord = JSON.stringify(this.records[this.total-1])
-          // const lastRecord = {"id":2}
-          // console.log("record内容："+ lastRecord.id)
-
-          // this.temp.id = this.total+1
+          this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
+          this.temp.author = 'vue-element-admin'
+          this.temp.checkboxVal = this.checkboxVal
           createArticle(this.temp).then(() => {
-            // this.total += 1  //每新建一条记录，total值加一
-            // this.pages = Math.ceil(this.total/this.listQuery.limit) //改变页数
-            // this.records.unshift(this.temp)
+            this.list.unshift(this.temp)
             this.dialogFormVisible = false
-            this.getList() // 新建任务后重新获取任务列表
             this.$notify({
               title: 'Success',
               message: 'Created Successfully',
@@ -353,6 +379,7 @@ export default {
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row) // copy obj
+      this.temp.timestamp = new Date(this.temp.timestamp)
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {
@@ -363,9 +390,11 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          updateArticle(tempData, tempData.id).then(() => {
+          tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
+          updateArticle(tempData).then(() => {
+            const index = this.list.findIndex(v => v.id === this.temp.id)
+            this.list.splice(index, 1, this.temp)
             this.dialogFormVisible = false
-            this.getList()
             this.$notify({
               title: 'Success',
               message: 'Update Successfully',
@@ -377,19 +406,13 @@ export default {
       })
     },
     handleDelete(row, index) {
-      deleteArticle(index).then(() => {
-        this.getList() // 删除后重新拉取数据
-        this.$notify({
-          title: 'Success',
-          message: 'Delete Successfully',
-          type: 'success',
-          duration: 2000
-        })
-        // this.total -= 1  //每删除一条记录，total值减一
-        // this.pages = Math.ceil(this.total/this.listQuery.limit) //改变页数
-        // console.log("total的值："  + this.total)
+      this.$notify({
+        title: 'Success',
+        message: 'Delete Successfully',
+        type: 'success',
+        duration: 2000
       })
-      // this.records.splice(index, 1)
+      this.list.splice(index, 1)
     },
     handleFetchPv(pv) {
       fetchPv(pv).then(response => {
@@ -400,8 +423,8 @@ export default {
     handleDownload() {
       this.downloadLoading = true
       import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['createTime', 'title', 'type', 'importance', 'status']
-        const filterVal = ['createTime', 'title', 'type', 'importance', 'status']
+        const tHeader = ['timestamp', 'title', 'type', 'importance', 'status']
+        const filterVal = ['timestamp', 'title', 'type', 'importance', 'status']
         const data = this.formatJson(filterVal)
         excel.export_json_to_excel({
           header: tHeader,
@@ -412,8 +435,8 @@ export default {
       })
     },
     formatJson(filterVal) {
-      return this.records.map(v => filterVal.map(j => {
-        if (j === 'createTime') {
+      return this.list.map(v => filterVal.map(j => {
+        if (j === 'timestamp') {
           return parseTime(v[j])
         } else {
           return v[j]

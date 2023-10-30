@@ -2,7 +2,8 @@ import request from '@/utils/request'
 
 export function fetchList(query) {
   return request({
-    url: '/vue-element-admin/article/list',
+    // url: '/vue-element-admin/article/list',
+    url: 'job/list',
     method: 'get',
     params: query
   })
@@ -32,18 +33,27 @@ export function fetchPv(pv) {
   })
 }
 
-export function createArticle(data) {
+export function createArticle(addJobVo) {
   return request({
-    url: '/vue-element-admin/article/create',
+    // url: '/vue-element-admin/article/create',
+    url: '/job/add',
     method: 'post',
-    data
+    addJobVo: addJobVo
   })
 }
 
-export function updateArticle(data) {
+export function updateArticle(addJobVo, jobId) {
   return request({
-    url: '/vue-element-admin/article/update',
-    method: 'post',
-    data
+    // url: '/vue-element-admin/article/update',
+    url: '/job/update/' + jobId,
+    method: 'put',
+    addJobVo: addJobVo
+  })
+}
+
+export function deleteArticle(jobId) {
+  return request({
+    url: '/job/delete/' + jobId,
+    method: 'delete'
   })
 }
