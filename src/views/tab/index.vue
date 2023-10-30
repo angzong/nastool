@@ -21,11 +21,13 @@ export default {
   data() {
     return {
       tabMapOptions: [
-        { label: 'admin', key: 'admin' },
-        { label: 'editor', key: 'editor' },
-        { label: 'visitor', key: 'visitor' }
+        { label: 'ADMIN', key: 'ADMIN' },
+        { label: 'ADV_USER', key: 'ADV_USER' },
+        { label: 'GUEST', key: 'GUEST' },
+        { label: 'SYS_ADMIN', key: 'SYS_ADMIN' },
+        { label: 'USER', key: 'USER' }
       ],
-      activeName: 'admin',
+      activeName: 'ADMIN',
       createdTimes: 0
     }
   },

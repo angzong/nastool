@@ -7,9 +7,23 @@ export function login(data) {
     data
   })
 }
+export function fetchUser(params) {
+  return request({
+    url: '/user/list',
+    method: 'get',
+    params: params
+  })
+}
+
+export function deleteUser(query) {
+  console.log('/user/{userId}')
+  return request({
+    url: '/user/' + query ,
+    method: 'delete'
+  })
+}
 
 export function register(data) {
-  console.log("register+++")
   return request({
     url: '/authenticate/register',
     method: 'post',

@@ -159,7 +159,7 @@ export const asyncRoutes = [
         name: 'Userlist',
         meta: {
           title: '用户列表',
-          roles: ['admin'] // or you can only set roles in sub nav
+          roles: ['ADMIN'] // or you can only set roles in sub nav
         }
       }
       ,
