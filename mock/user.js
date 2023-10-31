@@ -92,6 +92,26 @@ module.exports = [
     }
   },
 
+
+  //user search
+  {
+    url: '/user/*',
+    type: 'get',
+    response: config => {
+      const info = {
+        "email": "avbsajbvkja",
+        "id": 789456,
+        "password": "545454545",
+        "plugins": ['a','b','c'],
+        "userLevel": "SYS_ADMIN",
+        "username": "cccccc"
+      }
+      return {
+        code: 20000,
+        data: info
+      }
+    }
+  },
   // user login
   {
     url: '/authenticate/login',

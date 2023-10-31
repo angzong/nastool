@@ -1,10 +1,9 @@
 import request from '@/utils/request'
 
-export function searchUser(name) {
+export function searchUser(query) {
   return request({
-    url: '/vue-element-admin/search/user',
-    method: 'get',
-    params: { name }
+    url: '/user/' + query ,
+    method: 'get'
   })
 }
 

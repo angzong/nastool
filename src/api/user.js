@@ -16,7 +16,7 @@ export function fetchUser(params) {
 }
 
 export function deleteUser(query) {
-  console.log('/user/{userId}')
+  // console.log('/user/{userId}')
   return request({
     url: '/user/' + query ,
     method: 'delete'
