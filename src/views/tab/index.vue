@@ -94,6 +94,9 @@ export default {
     handleReset(){
       this.$refs.tabpane.getList()
     },
+    handleCreate(){
+      this.$refs.tabpane.getList()
+    },
     handleSearch(){
       this.listLoading = true
       searchUser(this.listQuery.id).then(response => {

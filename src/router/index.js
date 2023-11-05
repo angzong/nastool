@@ -144,7 +144,7 @@ export const asyncRoutes = [
     meta: {
       title: '用户管理',
       icon: 'lock',
-      roles: ['admin', 'editor', 'visitor'] // you can set roles in root nav
+      roles: ['ADMIN','ADV_USER','SYS_ADMIN'	] // you can set roles in root nav
     },
     children: [
       {
@@ -169,21 +169,23 @@ export const asyncRoutes = [
         name: 'RolePermission',
         meta: {
           title: '权限设置',
-          roles: ['admin']
+          roles: ['ADMIN']
         }
       },
       {
         path: 'page',
         component: () => import('@/views/permission/page'),
         name: 'PagePermission',
+        hidden: true,
         meta: {
           title: 'Page Permission',
-          roles: ['admin'] // or you can only set roles in sub nav
+          roles: ['ADMIN'] // or you can only set roles in sub nav
         }
       },
       
       {
         path: 'directive',
+        hidden: true,
         component: () => import('@/views/permission/directive'),
         name: 'DirectivePermission',
         meta: {
@@ -254,6 +256,7 @@ export const asyncRoutes = [
   },
   {
     path: '/example',
+    hidden: true,
     component: Layout,
     redirect: '/example/list',
     name: 'Example',
@@ -284,15 +287,16 @@ export const asyncRoutes = [
     ]
   },
   /** when your routing map is too long, you can split it into small modules **/
-  componentsRouter,
-  chartsRouter,
-  nestedRouter,
-  tableRouter,
+  // componentsRouter,
+  // chartsRouter,
+  // nestedRouter,
+  // tableRouter,
 
   
 
   {
     path: '/tab',
+    hidden: true,
     component: Layout,
     children: [
       {
@@ -308,6 +312,7 @@ export const asyncRoutes = [
 
   {
     path: '/error-log',
+    hidden: true,
     component: Layout,
     children: [
       {
@@ -321,6 +326,7 @@ export const asyncRoutes = [
 
   {
     path: '/excel',
+    hidden: true,
     component: Layout,
     redirect: '/excel/export-excel',
     name: 'Excel',
@@ -358,6 +364,7 @@ export const asyncRoutes = [
 
   {
     path: '/zip',
+    hidden: true,
     component: Layout,
     redirect: '/zip/download',
     alwaysShow: true,
@@ -375,6 +382,7 @@ export const asyncRoutes = [
 
   {
     path: '/pdf',
+    hidden: true,
     component: Layout,
     redirect: '/pdf/index',
     children: [
@@ -388,12 +396,14 @@ export const asyncRoutes = [
   },
   {
     path: '/pdf/download',
+    hidden: true,
     component: () => import('@/views/pdf/download'),
     hidden: true
   },
 
   {
     path: '/theme',
+    
     component: Layout,
     children: [
       {
@@ -407,6 +417,7 @@ export const asyncRoutes = [
 
   {
     path: '/clipboard',
+    hidden: true,
     component: Layout,
     children: [
       {
@@ -414,17 +425,6 @@ export const asyncRoutes = [
         component: () => import('@/views/clipboard/index'),
         name: 'ClipboardDemo',
         meta: { title: 'Clipboard', icon: 'clipboard' }
-      }
-    ]
-  },
-
-  {
-    path: 'external-link',
-    component: Layout,
-    children: [
-      {
-        path: 'https://github.com/PanJiaChen/vue-element-admin',
-        meta: { title: 'External Link', icon: 'link' }
       }
     ]
   },

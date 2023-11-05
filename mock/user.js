@@ -92,6 +92,18 @@ module.exports = [
     }
   },
 
+  //user update
+  {
+    url: '/user/*',
+    type: 'put',
+    response: config => {
+      return {
+        code: 20000,
+        data: 'success'
+      }
+    }
+  },
+
 
   //user search
   {

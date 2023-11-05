@@ -23,6 +23,15 @@ export function deleteUser(query) {
   })
 }
 
+export function updateUser(userId,user) {
+  // console.log('/user/{userId}')
+  return request({
+    url: '/user/' + userId ,
+    method: 'put',
+    params: user
+  })
+}
+
 export function register(data) {
   return request({
     url: '/authenticate/register',

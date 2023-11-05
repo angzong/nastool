@@ -21,7 +21,7 @@
       <el-table-column min-width="200px" label="插件">
         <template slot-scope="{row}">
           <!-- <span>{{ row.userLevel }}</span> -->
-          <el-tag v-for="item in row.plugins" :key="item">{{ item }}</el-tag>
+          <el-tag v-for="item in row.plugins" :key="item" style="margin: 10px;">{{ item }}</el-tag>
         </template>
       </el-table-column>
 
@@ -61,37 +61,36 @@
             <el-button v-if="row.status!='deleted'" size="mini" type="danger" @click="handleDelete(row,$index)">
               删除
             </el-button>
-            <el-button size="mini" type="primary" @click="handleEdit(row)">
+            <el-button size="mini" type="primary" @click="handleEdit(row,$index)">
               编辑
             </el-button>
           </template>
         </el-table-column>
     </el-table>
-    
+
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
-        <el-form-item label="Type" prop="type">
-          <el-select v-model="temp.type" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="Date" prop="timestamp">
+        
+        <!-- <el-form-item label="Date" prop="timestamp">
           <el-date-picker v-model="temp.timestamp" type="datetime" placeholder="Please pick a date" />
+        </el-form-item> -->
+        <el-form-item label="用户名" prop="username">
+          <el-input v-model="temp.username" />
         </el-form-item>
-        <el-form-item label="Title" prop="title">
-          <el-input v-model="temp.title" />
+        <el-form-item label="邮箱" prop="email">
+          <el-input v-model="temp.email" />
         </el-form-item>
-        <el-form-item label="Status">
-          <el-select v-model="temp.status" class="filter-item" placeholder="Please select">
+        <el-form-item label="密码" prop="password">
+          <el-input v-model="temp.password" />
+        </el-form-item>
+        <el-form-item label="用户权限">
+          <el-select v-model="temp.userLevel" class="filter-item" placeholder="Please select">
             <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item" />
           </el-select>
         </el-form-item>
-        <el-form-item label="Imp">
-          <el-rate v-model="temp.importance" :colors="['#99A9BF', '#F7BA2A', '#FF9900']" :max="3" style="margin-top:8px;" />
-        </el-form-item>
-        <el-form-item label="Remark">
-          <el-input v-model="temp.remark" :autosize="{ minRows: 2, maxRows: 4}" type="textarea" placeholder="Please input" />
+        <el-form-item label="插件" prop="plugins">
+          <el-tag v-for="item in temp.plugins" :key="item" style="margin: 10px;">{{ item }}</el-tag>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -108,7 +107,7 @@
 </template>
 
 <script>
-import { fetchUser,deleteUser } from '@/api/user'
+import { fetchUser,deleteUser,updateUser } from '@/api/user'
 import permission from '@/directive/permission/index.js' // 权限判断指令
 import Pagination from '@/components/Pagination'
 export default {
@@ -141,14 +140,14 @@ export default {
         update: 'Edit',
         create: 'Create'
       },
-      temp: {
-        id: undefined,
-        importance: 1,
-        remark: '',
-        timestamp: new Date(),
-        title: '',
-        type: '',
-        status: '使用中'
+      statusOptions: ['ADMIN','ADV_USER','GUEST','SYS_ADMIN','USER'	],
+      temp:     {
+        "email": "",
+        "id": 0,
+        "password": "",
+        "plugins": [],
+        "userLevel": "",
+        "username": ""
       },
       listQuery: {
         page: 1,
@@ -183,7 +182,8 @@ export default {
         this.$refs['dataForm'].clearValidate()
       })
     },
-    handleEdit() {
+    handleEdit(row,index) {
+      this.temp=row
       this.dialogStatus = 'edit'
       this.dialogFormVisible = true
       this.$nextTick(() => {
@@ -219,10 +219,11 @@ export default {
     },
     updateData() {
       this.$refs['dataForm'].validate((valid) => {
+
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
-          updateArticle(tempData).then(() => {
+          // tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
+          updateUser(tempData).then(() => {
             const index = this.list.findIndex(v => v.id === this.temp.id)
             this.list.splice(index, 1, this.temp)
             this.dialogFormVisible = false
