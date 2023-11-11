@@ -28,6 +28,7 @@ const mutations = {
     state.roles = roles
   }
 }
+//此处主要负责token的记录，所以是store文件夹，将在此处进一步调用src/api文件夹下的函数
 
 const actions = {
   // user login

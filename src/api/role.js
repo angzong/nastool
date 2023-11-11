@@ -1,5 +1,6 @@
 import request from '@/utils/request'
-
+//这里是更改权限，不过估计用不到了
+//你在后端做了
 export function getRoutes() {
   return request({
     url: '/vue-element-admin/routes',

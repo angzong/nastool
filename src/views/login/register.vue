@@ -78,6 +78,7 @@
     name: 'Register',
     components: { SocialSign },
     data() {
+      //初步检验规则
       const validateUsername = (rule, value, callback) => {
         if (value=='') {
           callback(new Error('请填写用户名'))
@@ -154,6 +155,7 @@
         const { key } = e
         this.capsTooltip = key && key.length === 1 && (key >= 'A' && key <= 'Z')
       },
+      //眼睛
       showPwd() {
         if (this.passwordType === 'password') {
           this.passwordType = ''
@@ -164,6 +166,7 @@
           this.$refs.password.focus()
         })
       },
+      //点击注册
       handleRegister() {
         this.$refs.registerForm.validate(valid => {
           if (valid) {
@@ -182,6 +185,7 @@
           }
         })
       },
+      //返回登录界面
       handleBackLogin(){
         this.$router.push({ path:  '/login', query: this.otherQuery })
         // this.loading = false

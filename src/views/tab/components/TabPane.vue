@@ -69,6 +69,7 @@
     </el-table>
 
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
+    <!-- 修改信息对话框 -->
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
         
@@ -162,6 +163,7 @@ export default {
     this.getList()
   },
   methods: {
+    //获取用户列表，打开页面时展示的数据，调动api的函数fetchUser
     getList() {
       this.loading = true
       this.$emit('create') // for test
@@ -175,6 +177,7 @@ export default {
         this.loading = false
       })
     },
+    //用不到
     handleCreate() {
       this.dialogStatus = 'create'
       this.dialogFormVisible = true
@@ -182,6 +185,7 @@ export default {
         this.$refs['dataForm'].clearValidate()
       })
     },
+    //点击编辑
     handleEdit(row,index) {
       this.temp=row
       this.dialogStatus = 'edit'
@@ -190,6 +194,7 @@ export default {
         this.$refs['dataForm'].clearValidate()
       })
     },
+    //我留了新建用户的接口，用就改改，不用就算了
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
@@ -208,15 +213,7 @@ export default {
         }
       })
     },
-    handleUpdate(row) {
-      this.temp = Object.assign({}, row) // copy obj
-      this.temp.timestamp = new Date(this.temp.timestamp)
-      this.dialogStatus = 'update'
-      this.dialogFormVisible = true
-      this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-      })
-    },
+    //对话框点击确认后，调api
     updateData() {
       this.$refs['dataForm'].validate((valid) => {
 
@@ -237,6 +234,7 @@ export default {
         }
       })
     },
+    //删除用户，调用api
     handleDelete(row,index){
       this.loading = true
       deleteUser(row.id).then(response => {

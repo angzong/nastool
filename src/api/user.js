@@ -1,5 +1,6 @@
 import request from '@/utils/request'
-
+//这里是用户的增删改查api
+//baseurl在 .env.development文件下，替换“/dev-api”即可
 export function login(data) {
   return request({
     url: '/authenticate/login',
@@ -7,6 +8,7 @@ export function login(data) {
     data
   })
 }
+//得到用户列表
 export function fetchUser(params) {
   return request({
     url: '/user/list',
@@ -14,7 +16,7 @@ export function fetchUser(params) {
     params: params
   })
 }
-
+//删
 export function deleteUser(query) {
   // console.log('/user/{userId}')
   return request({
@@ -22,7 +24,7 @@ export function deleteUser(query) {
     method: 'delete'
   })
 }
-
+//更新
 export function updateUser(userId,user) {
   // console.log('/user/{userId}')
   return request({
@@ -31,7 +33,7 @@ export function updateUser(userId,user) {
     params: user
   })
 }
-
+//注册
 export function register(data) {
   return request({
     url: '/authenticate/register',
@@ -39,7 +41,7 @@ export function register(data) {
     data
   })
 }
-
+//拿用户信息
 export function getInfo(userId) {
   return request({
     url: '/user/',
@@ -47,7 +49,7 @@ export function getInfo(userId) {
     params: { userId }
   })
 }
-
+//登出
 export function logout() {
   return request({
     url: '/vue-element-admin/user/logout',

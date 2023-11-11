@@ -3,7 +3,7 @@
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" autocomplete="on" label-position="left">
 
       <div class="title-container">
-        <h3 class="title">登录到xyNas</h3>
+        <h3 class="title">登录到xyNasTools</h3>
       </div>
 
       <el-form-item prop="username">
@@ -21,7 +21,7 @@
         />
       </el-form-item>
 
-      <el-tooltip v-model="capsTooltip" content="Caps lock is On" placement="right" manual>
+      <el-tooltip v-model="capsTooltip" content="大写锁定已打开" placement="right" manual>
         <el-form-item prop="password">
           <span class="svg-container">
             <svg-icon icon-class="password" />
@@ -50,29 +50,8 @@
             <el-button :loading="loading" type="primary" style="width:45%;margin:10px;" @click.native.prevent="handleLogin">登录</el-button>
             <el-button :loading="loading" type="success" style="width:45%;margin:10px;" @click.native.prevent="handleRgister">去注册</el-button>
       </div>
-      <!-- <div style="position:relative">
-        <div class="tips">
-          <span>Username : admin</span>
-          <span>Password : any</span>
-        </div>
-        <div class="tips">
-          <span style="margin-right:18px;">Username : editor</span>
-          <span>Password : any</span>
-        </div>
-
-        <el-button class="thirdparty-button" type="primary" @click="showDialog=true">
-          Or connect with
-        </el-button>
-      </div> -->
     </el-form>
 
-    <!-- <el-dialog title="Or connect with" :visible.sync="showDialog">
-      Can not be simulated on local, so please combine you own business simulation! ! !
-      <br>
-      <br>
-      <br>
-      <social-sign />
-    </el-dialog> -->
   </div>
 </template>
 
@@ -84,6 +63,7 @@ export default {
   name: 'Login',
   components: { SocialSign },
   data() {
+    //这两个是自动检验密码/用户名是否符合标准
     const validateUsername = (rule, value, callback) => {
       if (!validUsername(value)) {
         callback(new Error('用户名或密码错误'))
@@ -99,19 +79,20 @@ export default {
       }
     }
     return {
+      //绑定输入
       loginForm: {
         username: 'admin',
         password: '111111'
       },
+      //前端检验规则
       loginRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],
         password: [{ required: true, trigger: 'blur', validator: validatePassword }]
       },
       passwordType: 'password',
       capsTooltip: false,
-      loading: false,
-      showDialog: false,
-      redirect: undefined,
+      loading: false,  //Loading时置为true
+      redirect: undefined, //登录后重定向到那个页面
       otherQuery: {}
     }
   },
@@ -141,10 +122,12 @@ export default {
     // window.removeEventListener('storage', this.afterQRScan)
   },
   methods: {
+    //提示大写锁定已经打开
     checkCapslock(e) {
       const { key } = e
       this.capsTooltip = key && key.length === 1 && (key >= 'A' && key <= 'Z')
     },
+    //密码边的小眼睛
     showPwd() {
       if (this.passwordType === 'password') {
         this.passwordType = ''
@@ -155,16 +138,20 @@ export default {
         this.$refs.password.focus()
       })
     },
+    //路由到注册
     handleRgister(){
       this.$router.push('/register' )
       this.loading = false
     },
+    //按下登录
     handleLogin() {
       this.$refs.loginForm.validate(valid => {
         if (valid) {
           this.loading = true
+          //到src/store文件夹下找这个函数
           this.$store.dispatch('user/login', this.loginForm)
             .then(() => {
+              //登陆成功，到主页（修改redirect也可自动到其他页面）
               this.$router.push({  path: this.redirect || '/', query: this.otherQuery })
               this.loading = false
             })

@@ -1,5 +1,5 @@
 import { asyncRoutes, constantRoutes } from '@/router'
-
+//这里是权限管理，用来筛选那些用户权限可以进入到那些页面，控制可以精确到页面。
 /**
  * Use meta.role to determine if the current user has permission
  * @param roles
