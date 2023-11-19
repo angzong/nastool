@@ -1,68 +1,83 @@
 <template>
-  <div v-if="errorLogs.length>0">
+  <div v-if="total>0">
     <el-badge :is-dot="true" style="line-height: 25px;margin-top: -5px;" @click.native="dialogTableVisible=true">
       <el-button style="padding: 8px 10px;" size="small" type="danger">
         <svg-icon icon-class="bug" />
       </el-button>
     </el-badge>
 
-    <el-dialog :visible.sync="dialogTableVisible" width="80%" append-to-body>
+    <el-dialog :visible.sync="dialogTableVisible" width="80%" append-to-body @open="getLog" @close="clear">
       <div slot="title">
         <span style="padding-right: 10px;">Error Log</span>
-        <el-button size="mini" type="primary" icon="el-icon-delete" @click="clearAll">Clear All</el-button>
       </div>
-      <el-table :data="errorLogs" border>
+      <el-table :data="errorLog" border>
         <el-table-column label="Message">
           <template slot-scope="{row}">
             <div>
-              <span class="message-title">Msg:</span>
+              <span class="message-title">id:</span>
               <el-tag type="danger">
-                {{ row.err.message }}
+                {{ row.id }}
               </el-tag>
             </div>
             <br>
-            <div>
-              <span class="message-title" style="padding-right: 10px;">Info: </span>
-              <el-tag type="warning">
-                {{ row.vm.$vnode.tag }} error in {{ row.info }}
-              </el-tag>
-            </div>
-            <br>
-            <div>
-              <span class="message-title" style="padding-right: 16px;">Url: </span>
-              <el-tag type="success">
-                {{ row.url }}
-              </el-tag>
-            </div>
           </template>
         </el-table-column>
         <el-table-column label="Stack">
           <template slot-scope="scope">
-            {{ scope.row.err.stack }}
+            {{ scope.row.logDesc }}
           </template>
         </el-table-column>
       </el-table>
+      <pagination v-show="total>0" :total="total" :page.sync="listQuery.pageNum" :limit.sync="listQuery.pageSize"  @pagination="getLog" />
+
     </el-dialog>
+
   </div>
 </template>
 
 <script>
+import { getLogList } from '@/api/log'
+import Pagination from '@/components/Pagination'
+
 export default {
   name: 'ErrorLog',
+  components: { Pagination },
   data() {
     return {
-      dialogTableVisible: false
+      dialogTableVisible: false,
+      errorLog: [],
+      listQuery: {
+        pageSize: 5,
+        pageNum: 1
+      },
+      total: 0
     }
   },
-  computed: {
-    errorLogs() {
-      return this.$store.getters.errorLogs
-    }
+  created() {
+    this.getLog()
   },
+
   methods: {
-    clearAll() {
-      this.dialogTableVisible = false
-      this.$store.dispatch('errorLog/clearErrorLog')
+    getLog() {
+      getLogList(this.listQuery).then(response => {
+        this.errorLog = response.data.records
+        this.total = response.data.total
+        console.log(this.errorLog)
+      })
+    },
+    clear() {
+      this.errorLog = []
+    },
+    handleSizeChange(val) {
+      console.log(val)
+      this.listQuery.pageSize = val
+      this.getLog()
+    },
+    handleCurrentChange(val) {
+      console.log(val)
+
+      this.listQuery.pageNum = val
+      this.getLog()
     }
   }
 }

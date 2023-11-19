@@ -1,5 +1,5 @@
 import { login,register, logout, getInfo } from '@/api/user'
-import { getToken, setToken, removeToken } from '@/utils/auth'
+import { getToken, setToken, removeToken, setId } from '@/utils/auth'
 import router, { resetRouter } from '@/router'
 
 const state = {
@@ -12,6 +12,9 @@ const state = {
 }
 
 const mutations = {
+  SET_ID: (state, id) => {
+    state.id = id
+  },
   SET_TOKEN: (state, token) => {
     state.token = token
   },
@@ -37,8 +40,11 @@ const actions = {
     return new Promise((resolve, reject) => {
       login({ username: username.trim(), password: password }).then(response => {
         const { data } = response
+        console.log(data)
         commit('SET_TOKEN', data.token)
+        commit('SET_ID', data.userId)
         setToken(data.token)
+        setId(data.userId)
         resolve()
       }).catch(error => {
         reject(error)
@@ -50,11 +56,9 @@ const actions = {
     const { username, password, email } = userInfo
     console.log("register_store")
     return new Promise((resolve, reject) => {
-      // loginAndRegisterVo = 
+      // loginAndRegisterVo =
       register({ username: username.trim(), password: password , email: email}).then(response => {
         const { data } = response
-        commit('SET_TOKEN', data.token)
-        setToken(data.token)
         resolve()
       }).catch(error => {
         reject(error)
@@ -64,9 +68,9 @@ const actions = {
   // get user info
   getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
-      getInfo(state.token).then(response => {
+      getInfo(state.id).then(response => {
         const { data } = response
-
+        console.log(response)
         if (!data) {
           reject('Verification failed, please Login again.')
         }
@@ -92,22 +96,24 @@ const actions = {
 
   // user logout
   logout({ commit, state, dispatch }) {
+    commit('SET_TOKEN', '')
+    commit('SET_ROLES', [])
+    removeToken()
+    resetRouter()
+
+    // reset visited views and cached views
+    // to fixed https://github.com/PanJiaChen/vue-element-admin/issues/2485
+    dispatch('tagsView/delAllViews', null, { root: true })
+
     return new Promise((resolve, reject) => {
-      logout(state.token).then(() => {
-        commit('SET_TOKEN', '')
-        commit('SET_ROLES', [])
-        removeToken()
-        resetRouter()
-
-        // reset visited views and cached views
-        // to fixed https://github.com/PanJiaChen/vue-element-admin/issues/2485
-        dispatch('tagsView/delAllViews', null, { root: true })
-
+      // loginAndRegisterVo =
+      logout().then(response => {
         resolve()
       }).catch(error => {
         reject(error)
       })
     })
+
   },
 
   // remove token

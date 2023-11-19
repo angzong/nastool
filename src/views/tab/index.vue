@@ -1,29 +1,29 @@
 <template>
   <div class="tab-container">
     <div class="filter-container">
-      <!-- 输入查找条件，我多放了按用户名查找和正反排序查找，不想要可以只留用户ID的input -->
-      <el-input v-model="listQuery.username" placeholder="用户名" style="width: 200px;" class="filter-item" @keyup.enter.native="handleSearch" />
-      <el-input v-model="listQuery.id" placeholder="用户iD" style="width: 200px;" class="filter-item" @keyup.enter.native="handleSearch" />
-      <el-select v-model="listQuery.sort" style="width: 140px" class="filter-item" @change="handleFilter">
-        <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />
-      </el-select>
+<!--      &lt;!&ndash; 输入查找条件，我多放了按用户名查找和正反排序查找，不想要可以只留用户ID的input &ndash;&gt;-->
+<!--      <el-input v-model="listQuery.username" placeholder="用户名" style="width: 200px;" class="filter-item" @keyup.enter.native="handleSearch" />-->
+<!--      <el-input v-model="listQuery.id" placeholder="用户iD" style="width: 200px;" class="filter-item" @keyup.enter.native="handleSearch" />-->
+<!--      <el-select v-model="listQuery.sort" style="width: 140px" class="filter-item" @change="handleFilter">-->
+<!--        <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />-->
+<!--      </el-select>-->
 
-      <!-- 输入查找条件后，点击查找，调用handleSearch -->
-      <el-button v-waves class="filter-item" type="primary" style="margin-left: 20px;" icon="el-icon-search" @click="handleSearch">
-        查找
-      </el-button>
-      <!-- 你好像没留接口，不用就删了吧 -->
-      <el-button class="filter-item" style="margin-left: 20px;" type="primary" icon="el-icon-edit" @click="handleCreate">
-        新增
-      </el-button>
+<!--      &lt;!&ndash; 输入查找条件后，点击查找，调用handleSearch &ndash;&gt;-->
+<!--      <el-button v-waves class="filter-item" type="primary" style="margin-left: 20px;" icon="el-icon-search" @click="handleSearch">-->
+<!--        查找-->
+<!--      </el-button>-->
+<!--      &lt;!&ndash; 你好像没留接口，不用就删了吧 &ndash;&gt;-->
+<!--      <el-button class="filter-item" style="margin-left: 20px;" type="primary" icon="el-icon-edit" @click="handleCreate">-->
+<!--        新增-->
+<!--      </el-button>-->
       <!-- 查找之后，重置列表 -->
       <el-button class="filter-item" style="margin-left: 20px;" type="primary" icon="el-icon-edit" @click="handleReset">
         重置
       </el-button>
       <!-- 这里v-permission="['ADMIN']",可以方便的控制谁可以看到这个check-box，你可以进行更改 -->
-      <el-checkbox v-permission="['ADMIN']" v-model="showPassword" class="filter-item" style="margin-left:20px;" @change="tableKey=tableKey+1">
-        查看密码
-      </el-checkbox>
+<!--      <el-checkbox v-permission="['ADMIN']" v-model="showPassword" class="filter-item" style="margin-left:20px;" @change="tableKey=tableKey+1">-->
+<!--        查看密码-->
+<!--      </el-checkbox>-->
     </div>
     <!-- <el-tag>mounted times ：{{ createdTimes }}</el-tag> -->
     <!-- <el-alert :closable="false" style="width:200px;display:inline-block;vertical-align: middle;margin-left:30px;" title="Tab with keep-alive" type="success" /> -->
@@ -90,7 +90,7 @@ export default {
         this.$refs.tabpane._data.showPassword=val
       }
     }
-    
+
   },
   created() {
     // init the default selected tab
@@ -123,9 +123,9 @@ export default {
           "plugins": response.data.plugins,
           "userLevel": response.data.userLevel,
           "username": response.data.username
-          
+
         }]
-        
+
         this.$refs.tabpane._data.total = 1
         this.listLoading = false
       })

@@ -72,17 +72,17 @@ export default {
       }
     }
     const validatePassword = (rule, value, callback) => {
-      if (value.length < 6) {
-        callback(new Error('密码不能少于六位'))
+      if (value.length < 5) {
+        callback(new Error('密码不能少于五位'))
       } else {
         callback()
       }
     }
     return {
-      //绑定输入
+      // 绑定输入
       loginForm: {
         username: 'admin',
-        password: '111111'
+        password: 'admin'
       },
       //前端检验规则
       loginRules: {
@@ -114,8 +114,6 @@ export default {
   mounted() {
     if (this.loginForm.username === '') {
       this.$refs.username.focus()
-    } else if (this.loginForm.password === '') {
-      this.$refs.password.focus()
     }
   },
   destroyed() {
@@ -149,9 +147,11 @@ export default {
         if (valid) {
           this.loading = true
           //到src/store文件夹下找这个函数
+
           this.$store.dispatch('user/login', this.loginForm)
             .then(() => {
               //登陆成功，到主页（修改redirect也可自动到其他页面）
+              console.log(this.redirect)
               this.$router.push({  path: this.redirect || '/', query: this.otherQuery })
               this.loading = false
             })

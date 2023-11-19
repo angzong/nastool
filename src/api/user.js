@@ -27,10 +27,11 @@ export function deleteUser(query) {
 //更新
 export function updateUser(userId,user) {
   // console.log('/user/{userId}')
+  console.log(user)
   return request({
     url: '/user/' + userId ,
     method: 'put',
-    params: user
+    data: user
   })
 }
 //注册
@@ -44,15 +45,13 @@ export function register(data) {
 //拿用户信息
 export function getInfo(userId) {
   return request({
-    url: '/user/',
-    method: 'get',
-    params: { userId }
+    url: `/user/${userId}`,
+    method: 'get'
   })
 }
 //登出
 export function logout() {
   return request({
-    url: '/vue-element-admin/user/logout',
-    method: 'post'
+    url: '/user/logout',
   })
 }

@@ -1,28 +1,28 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input v-model="listQuery.title" placeholder="标题" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <el-select v-model="listQuery.importance" placeholder="优先级" clearable style="width: 90px" class="filter-item">
-        <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item" />
-      </el-select>
-      <el-select v-model="listQuery.type" placeholder="类型" clearable class="filter-item" style="width: 130px">
-        <el-option v-for="item in invokeMethodTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key" />
-      </el-select>
-      <el-select v-model="listQuery.sort" style="width: 140px" class="filter-item" @change="handleFilter">
-        <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />
-      </el-select>
-      <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
-        查找
-      </el-button>
+<!--      <el-input v-model="listQuery.title" placeholder="标题" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />-->
+<!--      <el-select v-model="listQuery.importance" placeholder="优先级" clearable style="width: 90px" class="filter-item">-->
+<!--        <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item" />-->
+<!--      </el-select>-->
+<!--      <el-select v-model="listQuery.type" placeholder="类型" clearable class="filter-item" style="width: 130px">-->
+<!--        <el-option v-for="item in invokeMethodTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key" />-->
+<!--      </el-select>-->
+<!--      <el-select v-model="listQuery.sort" style="width: 140px" class="filter-item" @change="handleFilter">-->
+<!--        <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />-->
+<!--      </el-select>-->
+<!--      <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">-->
+<!--        查找-->
+<!--      </el-button>-->
       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">
         新建
       </el-button>
-      <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">
-        导出
-      </el-button>
-      <el-checkbox v-model="showReviewer" class="filter-item" style="margin-left:15px;" @change="tableKey=tableKey+1">
-        显示创建者
-      </el-checkbox>
+<!--      <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">-->
+<!--        导出-->
+<!--      </el-button>-->
+<!--      <el-checkbox v-model="showReviewer" class="filter-item" style="margin-left:15px;" @change="tableKey=tableKey+1">-->
+<!--        显示创建者-->
+<!--      </el-checkbox>-->
     </div>
 
     <el-table
@@ -75,20 +75,14 @@
       </el-table-column>
       <el-table-column label="操作" align="center" width="230" class-name="small-padding fixed-width">
         <template slot-scope="{row,$index}">
-          <el-button type="primary" size="mini" @click="handleUpdate(row)">
-            修改
+          <el-button type="primary" size="mini" @click="handleStart(row)">
+            启动
           </el-button>
-          <el-button v-if="row.status =='PENDING'" size="mini" type="warning" @click="handleModifyStatus(row,'PROCESSING')">
+          <el-button size="mini" type="normal" @click="handleRunOnce(row)">
+            执行一次
+          </el-button>
+          <el-button size="mini" type="danger" @click="handleStop(row)">
             挂起
-          </el-button>
-          <el-button v-if="row.status =='PROCESSING'" size="mini" type="success" @click="handleModifyStatus(row,'PENDING')">
-            进行中
-          </el-button>
-          <el-button v-if="row.status =='PROCESSED'" size="mini" type="info">
-            已完成
-          </el-button>
-          <el-button v-if="row.status!='deleted'" size="mini" type="danger" @click="handleDelete(row,$index)">
-            删除
           </el-button>
         </template>
       </el-table-column>
@@ -97,10 +91,20 @@
     <pagination v-show="total>0" :total="total" :pages.sync="listQuery.pageNum" :size.sync="listQuery.pageSize" @pagination="getList" />
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="140px" style="width: 400px; margin-left:50px;">
+
+      <el-form ref="metadataForm" :rules="rules" label-position="left" label-width="140px" style="width: 400px; margin-left:50px;">
         <el-form-item label="任务组名">
-          <el-input v-model="temp.jobGroup" />
+          <el-select v-model="groupName" class="filter-item" placeholder="请选择" @change="changeOption">
+            <el-option v-for="(item,index) in metadata" :key="item.groupName" :label="item.groupName" :value="index" />
+          </el-select>
         </el-form-item>
+        <el-form-item label="任务描述">
+          {{desc}}
+        </el-form-item>
+      </el-form>
+
+      <br/>
+      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="140px" style="width: 400px; margin-left:50px;">
         <el-form-item label="任务名">
           <el-input v-model="temp.jobName" />
         </el-form-item>
@@ -114,20 +118,23 @@
             <vueCron i18n="cn" @change="changeCron" @close="cronPopover=false" />
           </el-popover>
         </el-form-item>
-        <el-form-item label="请求方式" prop="invokeMethod">
-          <el-select v-model="temp.invokeMethod" class="filter-item" placeholder="请选择">
-            <el-option v-for="item in invokeMethodTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
-          </el-select>
-        </el-form-item>
+<!--        <el-form-item label="请求方式" prop="invokeMethod">-->
+<!--          <el-select v-model="temp.invokeMethod" class="filter-item" placeholder="请选择">-->
+<!--            <el-option v-for="item in invokeMethodTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />-->
+<!--          </el-select>-->
+<!--        </el-form-item>-->
         <el-form-item label="请求参数">
           <el-input v-model="temp.invokeParam" />
         </el-form-item>
-        <el-form-item label="调用目标字符串">
-          <el-input v-model="temp.invokeTarget" />
+        <el-form-item label="路径参数">
+          <el-input v-model="pathvariable" />
         </el-form-item>
-        <el-form-item label="cron计划策略">
-          <el-input v-model="temp.misfirePolicy" />
-        </el-form-item>
+<!--        <el-form-item label="调用目标字符串">-->
+<!--          <el-input v-model="temp.invokeTarget" />-->
+<!--        </el-form-item>-->
+<!--        <el-form-item label="cron计划策略">-->
+<!--          <el-input v-model="temp.misfirePolicy" />-->
+<!--        </el-form-item>-->
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">
@@ -152,16 +159,17 @@
 </template>
 
 <script>
-import { fetchList, fetchPv, createArticle, updateArticle, deleteArticle } from '@/api/article'
+import { fetchList, fetchPv, createArticle, updateArticle, deleteArticle, getMetadata, start, stop, runOnce } from '@/api/article'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
-import Pagination from '@/components/Pagination' // secondary package based on el-pagination
+import Pagination from '@/components/Pagination'
+import { getId } from '@/utils/auth' // secondary package based on el-pagination
 const defaultFormThead = ['Mon', 'Sun']
 const invokeMethodTypeOptions = [
-  { key: 'HTTP_GET', display_name: 'HTTP_GET' },
-  { key: 'HTTP_POST', display_name: 'HTTP_POST' },
-  { key: 'HTTP_PUT', display_name: 'HTTP_PUT' },
-  { key: 'HTTP_DELETE', display_name: 'HTTP_DELETE' }
+  { key: 'GET', display_name: 'GET' },
+  { key: 'POST', display_name: 'POST' },
+  { key: 'PUT', display_name: 'PUT' },
+  { key: 'DELETE', display_name: 'DELETE' }
 ]
 /* const pluginTypeOptions = [
     { key: 'CN', display_name: '影视类' },
@@ -194,6 +202,10 @@ export default {
   },
   data() {
     return {
+      operations: ['启动任务', '挂起任务', '立即执行一次'],
+      metadata: [],
+      desc: '',
+      id: getId(),
       tableKey: 6,
       listLoading: true,
       not_used: true,
@@ -211,6 +223,7 @@ export default {
         update: '修改',
         create: '新建'
       },
+      selectTitle: '执行操作',
       dialogPvVisible: false,
       pvData: [],
       rules: {
@@ -228,27 +241,30 @@ export default {
       size: 20, // 每页大小
       total: 0, // 记录条数
       records: [], // 记录数组
+      policy:['MISFIRE_DEFAULT','MISFIRE_IGNORE_MISFIRES','MISFIRE_FIRE_AND_PROCEED','MISFIRE_DO_NOTHING'],
       temp:
         {
-          concurrent: '', // 是否允许并发执行
+          concurrent: '测试任务', // 是否允许并发执行
           cronExpression: '', // cron执行表达式
           invokeMethod: '', // 请求方式
           invokeParam: '', // 请求参数
           invokeTarget: '', // 调用目标字符串
           jobGroup: '', // 任务组名
           jobName: '', // 任务名
-          misfirePolicy: '' // cron计划策略
+          misfirePolicy: 'MISFIRE_DEFAULT' // cron计划策略
         },
+      pathvariable: '',
+      groupName: '',
       listQuery: {
         pageNum: 1,
         pageSize: 20,
-        sort: '+id'
       },
       cronPopover: false
     }
   },
   created() {
     this.getList()
+    this.getMetadata()
   },
   // watch: {
   //     checkboxVal(valArr) {
@@ -257,15 +273,32 @@ export default {
   //     }
   // },
   methods: {
+    changeOption(value) {
+      const option = this.metadata[value]
+      this.groupName = option.groupName
+      this.desc = option.groupDesc
+      this.temp.invokeTarget = option.groupTarget
+      this.temp.jobGroup = option.groupName
+      this.temp.invokeMethod = option.groupMethod
+      this.pathvariable = option.groupPaths || '不用填写'
+      this.temp.invokeParam = option.groupParams || '不用填写'
+
+      console.log(this.temp)
+    },
+    getMetadata() {
+      getMetadata().then((response) => {
+        this.metadata = response.data
+        console.log(this.metadata)
+      })
+    },
     getList() {
       this.listLoading = true
-      fetchList(this.listQuery).then(response => {
+      fetchList(this.id, this.listQuery).then(response => {
         this.current = response.data.current
         this.pages = response.data.pages
         this.size = response.data.size
         this.total = response.data.total
         this.records = response.data.records
-        console.log(this.records)
 
         // Just to simulate the time of the request
         setTimeout(() => {
@@ -312,8 +345,9 @@ export default {
         invokeTarget: '', // 调用目标字符串
         jobGroup: '', // 任务组名
         jobName: '', // 任务名
-        misfirePolicy: '' // cron计划策略
+        misfirePolicy: 'MISFIRE_DEFAULT' // cron计划策略
       }
+      this.pathvariable = ''
     },
     changeCron(val) {
       this.temp.cronExpression = val
@@ -322,23 +356,23 @@ export default {
       this.resetTemp()
       this.dialogStatus = 'create'
       this.dialogFormVisible = true
+      console.log(this.metadata)
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
     },
     createData() {
+      this.temp.misfirePolicy = 1
+      if (this.pathvariable !== '不用填写') {
+        this.temp.invokeTarget = this.temp.invokeTarget + this.pathvariable
+      }
+      if (this.temp.invokeParam === '不用填写') {
+        this.temp.invokeParam = ''
+      }
+      console.log(this.temp)
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          // this.temp.id = this.records[this.total-1].id+1
-          // const lastRecord = JSON.stringify(this.records[this.total-1])
-          // const lastRecord = {"id":2}
-          // console.log("record内容："+ lastRecord.id)
-
-          // this.temp.id = this.total+1
           createArticle(this.temp).then(() => {
-            // this.total += 1  //每新建一条记录，total值加一
-            // this.pages = Math.ceil(this.total/this.listQuery.limit) //改变页数
-            // this.records.unshift(this.temp)
             this.dialogFormVisible = false
             this.getList() // 新建任务后重新获取任务列表
             this.$notify({
@@ -423,6 +457,15 @@ export default {
     getSortClass: function(key) {
       const sort = this.listQuery.sort
       return sort === `+${key}` ? 'ascending' : 'descending'
+    },
+    handleStart(item) {
+      start(item.id)
+    },
+    handleStop(item) {
+      stop(item.id)
+    },
+    handleRunOnce(item) {
+      runOnce(item.id)
     }
   }
 }

@@ -102,12 +102,12 @@ export const asyncRoutes = [
       roles: ['ADMIN','ADV_USER','SYS_ADMIN'	] // you can set roles in root nav
     },
     children: [
-      {
-        path: 'profile',
-        component: () => import('@/views/profile/index'),
-        name: 'Profile',
-        meta: { title: '我的', noCache: true }
-      },
+      // {
+      //   path: 'profile',
+      //   component: () => import('@/views/profile/index'),
+      //   name: 'Profile',
+      //   meta: { title: '我的', noCache: true }
+      // },
       {
         path: 'userlist',
         component: () => import('@/views/tab/index'),
@@ -118,15 +118,15 @@ export const asyncRoutes = [
         }
       }
       ,
-      {
-        path: 'role',
-        component: () => import('@/views/permission/role'),
-        name: 'RolePermission',
-        meta: {
-          title: '权限设置',
-          roles: ['ADMIN']
-        }
-      },
+      // {
+      //   path: 'role',
+      //   component: () => import('@/views/permission/role'),
+      //   name: 'RolePermission',
+      //   meta: {
+      //     title: '权限设置',
+      //     roles: ['ADMIN']
+      //   }
+      // },
       {
         path: 'page',
         component: () => import('@/views/permission/page'),
@@ -137,7 +137,7 @@ export const asyncRoutes = [
           roles: ['ADMIN'] // or you can only set roles in sub nav
         }
       },
-      
+
       {
         path: 'directive',
         hidden: true,
@@ -181,10 +181,22 @@ export const asyncRoutes = [
         component: () => import('@/views/table/complex-table'),
         name: 'My-plugin',
         meta: { title: '我的插件' }
+      },
+      {
+        path: 'photo',
+        component: () => import('@/views/table/photo'),
+        name: 'My-photo',
+        meta: { title: '图片管理插件' }
+      },
+      {
+        path: 'anime',
+        component: () => import('@/views/table/file-management'),
+        name: 'My-anime',
+        meta: { title: '影视管理插件' }
       }
     ]
   },
-  
+
   //定时任务
   {
     path: '/task',
@@ -236,11 +248,11 @@ export const asyncRoutes = [
   // nestedRouter,
   // tableRouter,
 
-  
 
 
 
-  
+
+
 
   {
     path: '/error-log',
@@ -263,7 +275,7 @@ export const asyncRoutes = [
 
   {
     path: '/theme',
-    
+
     component: Layout,
     hidden:true,
     children: [

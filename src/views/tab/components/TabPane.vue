@@ -42,7 +42,7 @@
           <span>{{ scope.row.email }}</span>
         </template>
       </el-table-column>
-    
+
       <el-table-column class-name="status-col" label="用户权限" width="150">
         <template slot-scope="{row}">
           <el-tag :type="row.status | statusFilter">
@@ -72,7 +72,7 @@
     <!-- 修改信息对话框 -->
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
-        
+
         <!-- <el-form-item label="Date" prop="timestamp">
           <el-date-picker v-model="temp.timestamp" type="datetime" placeholder="Please pick a date" />
         </el-form-item> -->
@@ -104,7 +104,7 @@
       </div>
     </el-dialog>
 
-  </div>  
+  </div>
 </template>
 
 <script>
@@ -216,11 +216,10 @@ export default {
     //对话框点击确认后，调api
     updateData() {
       this.$refs['dataForm'].validate((valid) => {
-
         if (valid) {
           const tempData = Object.assign({}, this.temp)
           // tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
-          updateUser(tempData).then(() => {
+          updateUser(tempData.id,tempData).then(() => {
             const index = this.list.findIndex(v => v.id === this.temp.id)
             this.list.splice(index, 1, this.temp)
             this.dialogFormVisible = false

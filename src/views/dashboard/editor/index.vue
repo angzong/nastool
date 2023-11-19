@@ -1,5 +1,5 @@
 <template>
-  <div class="dashboard-editor-container">
+  <div class="dashboard-editor-container" style="background-image:url('https://free.wzznft.com/i/2023/11/13/xdryqx.png');background-size:cover">
     <div class=" clearfix">
       <pan-thumb :image="avatar" style="float: left">
         Your roles:
@@ -8,11 +8,8 @@
       <github-corner style="position: absolute; top: 0px; border: 0; right: 0;" />
       <div class="info-container">
         <span class="display_name">{{ name }}</span>
-        <span style="font-size:20px;padding-top:20px;display:inline-block;">Editor's Dashboard</span>
+        <span style="font-size:20px;padding-top:20px;display:inline-block;">欢迎使用xyNasTools!!!</span>
       </div>
-    </div>
-    <div>
-      <img :src="emptyGif" class="emptyGif">
     </div>
   </div>
 </template>
@@ -27,7 +24,8 @@ export default {
   components: { PanThumb, GithubCorner },
   data() {
     return {
-      emptyGif: 'https://wpimg.wallstcn.com/0e03b7da-db9e-4819-ba10-9016ddfdaed3'
+      emptyGif: 'D:\\1.png',
+      avatar: 'https://img1.baidu.com/it/u=2937088204,2497869090&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=707'
     }
   },
   computed: {
@@ -43,12 +41,12 @@ export default {
 <style lang="scss" scoped>
   .emptyGif {
     display: block;
-    width: 45%;
+    width: 100%;
     margin: 0 auto;
   }
 
   .dashboard-editor-container {
-    background-color: #e3e3e3;
+    background-color: #ffffff;
     min-height: 100vh;
     padding: 50px 60px 0px;
     .pan-info-roles {
